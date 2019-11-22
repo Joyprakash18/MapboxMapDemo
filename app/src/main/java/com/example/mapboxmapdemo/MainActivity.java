@@ -3,6 +3,8 @@ package com.example.mapboxmapdemo;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -27,6 +29,8 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
@@ -39,7 +43,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements
-        OnMapReadyCallback, PermissionsListener{
+        OnMapReadyCallback, PermissionsListener {
     private PermissionsManager permissionsManager;
     private MapboxMap mapboxMap;
     private MapView mapView;
@@ -52,6 +56,8 @@ public class MainActivity extends AppCompatActivity implements
     private long DEFAULT_MAX_WAIT_TIME = DEFAULT_INTERVAL_IN_MILLISECONDS * 5;
     private MainActivityLocationCallback callback = new MainActivityLocationCallback(this);
     private NavigationMapRoute navigationMapRoute;
+    private Button mStartButton;
+    DirectionsRoute route;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +65,24 @@ public class MainActivity extends AppCompatActivity implements
         Mapbox.getInstance(this, getString(R.string.access_token));
         setContentView(R.layout.activity_main);
         mapView = findViewById(R.id.mapView);
+        mStartButton = findViewById(R.id.startButton);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
+        mStartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean simulateRoute = true;
+
+// Create a NavigationLauncherOptions object to package everything together
+                NavigationLauncherOptions options = NavigationLauncherOptions.builder()
+                        .directionsRoute(route)
+                        .shouldSimulateRoute(simulateRoute)
+                        .build();
+
+// Call this method with Context from within an Activity
+                NavigationLauncher.startNavigation(MainActivity.this, options);
+            }
+        });
     }
 
     private void setMapClickListener() {
@@ -68,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public boolean onMapClick(@NonNull LatLng point) {
                 origin = Point.fromLngLat(originCoord.getLongitude(), originCoord.getLatitude());
-                destination = Point.fromLngLat(point.getLongitude(),point.getLatitude());
+                destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
 
                 NavigationRoute.builder(MainActivity.this)
                         .accessToken(Mapbox.getAccessToken())
@@ -78,7 +100,6 @@ public class MainActivity extends AppCompatActivity implements
                         .getRoute(new Callback<DirectionsResponse>() {
                             @Override
                             public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-                                DirectionsRoute route = null;
                                 if (response.body() != null && response.body().routes().size() != 0) {
                                     route = response.body().routes().get(0);
 //                                    boolean simulateRoute = true;
@@ -167,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements
                 });
     }
 
-    @SuppressWarnings( {"MissingPermission"})
+    @SuppressWarnings({"MissingPermission"})
     private void enableLocationComponent(@NonNull Style loadedMapStyle) {
 // Check if permissions are enabled and if not request
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
@@ -255,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements
                 Location location = result.getLastLocation();
                 originLocation = result.getLastLocation();
                 if (originLocation != null) {
-                    originCoord = new LatLng(originLocation.getLatitude(),originLocation.getLongitude());
+                    originCoord = new LatLng(originLocation.getLatitude(), originLocation.getLongitude());
                 }
 
                 if (location == null) {
