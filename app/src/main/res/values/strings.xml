@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MapboxMapDemo</string>
+    <string name="access_token">pk.eyJ1Ijoiam95cHJha2FzaCIsImEiOiJjazM5cHpvYmcwNXUxM3NwODgzb2Y1aHYzIn0.Qg81M7qOXBqo3rYrwIfQ1A</string>
+    <string name="user_location_permission_explanation">Please allow the permission</string>
+    <string name="user_location_permission_not_granted">User not granted the permission</string>
+    <string name="new_location">User Location</string>
+</resources>
